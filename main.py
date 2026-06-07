@@ -38,17 +38,16 @@ manager = ConnectionManager()
 #     return HTMLResponse(html)
 
 
-@app.websocket("/ws/{client_id}")
-async def websocket_endpoint(websocket: WebSocket, client_id: int):
+@app.websocket("/ws/{client_id}/{username}")
+async def websocket_endpoint(websocket: WebSocket, client_id: int, username):
     await manager.connect(websocket)
-    await manager.broadcast(f"Client #{client_id} joined the chat ")
-    await manager.broadcast(f"ONLINE::{manager.count()}")
+    await manager.broadcast(f"Client {username} joined the chat ")
     
     try:
         while True:
             data = await websocket.receive_text()
             # await manager.send_personal_message(f"You wrote: {data}", websocket)
-            await manager.broadcast(f"Client #{client_id} says: {data}")
+            await manager.broadcast(f"Client {username} says: {data}")
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-        await manager.broadcast(f"Client #{client_id} left the chat")
+        await manager.broadcast(f"Client {username} left the chat")
